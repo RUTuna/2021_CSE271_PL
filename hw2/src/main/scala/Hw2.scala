@@ -143,7 +143,7 @@ object LetRecToString {
       case Less(l, r) => s"${apply(l)} < ${apply(r)}"
       case Iszero(c) => s"iszero ${apply(c)}"
       case Ite(c, t, f) => s"if ${apply(c)} then ${apply(t)} else ${apply(f)}"
-      case Let(name, value, body) =>  s"let ${apply(name)}${apply(value)} in ${apply(body)}"
+      case Let(name, value, body) =>  s"let ${apply(name)}=${apply(value)} in ${apply(body)}"
       case Paren(expr) => s"(${apply(expr)})"
       case Proc(v, expr) => s"proc ${apply(v)} ${apply(expr)}"
       case PCall(ftn, arg) => s"${apply(ftn)} ${apply(arg)}"
