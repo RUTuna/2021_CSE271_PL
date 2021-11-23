@@ -327,7 +327,49 @@ object MiniCInterpreter {
   }
 
   def gc(env: Env, mem: Mem): Mem = {
-    Mem(mem.m, mem.top)
+    Mem(gcfor(env.toList, new HashMap[LocVal,Val], mem), mem.top)
+  }
+
+  def gcfor(envList: List[(Var, LocVal)], map: HashMap[LocVal,Val], oriMem: Mem): HashMap[LocVal,Val] = {
+    envList match {
+      case (head :: tail) => head match {
+        case (hVar: Var, hLoc: LocVal) => oriMem.get(hLoc) match {
+          case Some(v) => {
+            println("hloc: ", hLoc, "\n v: ", v)
+            v match {
+            case (loc2: LocVal) => oriMem.get(loc2) match {
+              case Some(v2) => gcfor(tail, gcRec(v2, map, oriMem) + (hLoc -> v) + (loc2 -> v2), oriMem)
+              case None => gcfor(tail, map, oriMem)
+            }
+
+            case ProcVal(args: List[Var], expr: Expr, env: Env) => gcfor(tail:::env.toList, map + (hLoc -> v), oriMem)
+
+            case RecordVal(field: Var, loc2: LocVal, next: RecordValLike) => oriMem.get(loc2) match {
+              case Some(v2) => gcfor(tail, gcRec(v2, map, oriMem) + (hLoc -> v) + (loc2 -> v2), oriMem)
+              case None => gcfor(tail, map, oriMem)
+            }
+
+            case _ => gcfor(tail, map + (hLoc -> v), oriMem)
+          }}
+          case None => gcfor(tail, map, oriMem)
+        }
+        case _ => map
+      }
+      case _ => map
+    }
+  }
+
+  def gcRec(v: Val, map: HashMap[LocVal,Val], oriMem: Mem): HashMap[LocVal,Val] = v match {
+    case (loc2: LocVal) => oriMem.get(loc2) match {
+      case Some(v2) => gcRec(v2, map + (loc2 -> v2), oriMem)
+      case None => map
+    }
+
+    case RecordVal(field: Var, loc2: LocVal, next: RecordValLike) => oriMem.get(loc2) match {
+      case Some(v2) => gcRec(v2, map + (loc2 -> v2), oriMem)
+      case None => map
+    }
+    case _ => map
   }
   
   def apply(program: String): (Val, Mem) = {

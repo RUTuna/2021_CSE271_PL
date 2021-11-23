@@ -133,12 +133,12 @@ def compareRecordVal(r: RecordValLike, l: RecordValLike): Boolean = {
     case _ => false
   }
 }
-// testGc.map((a: (Env, Mem , Mem)) => {
-//   val ref = a._3
-//   test(s"GcTest env: ${a._1}, mem: ${a._2}") {
-//     assert(MiniCInterpreter.gc(a._1, a._2) === a._3)
-//   }
-// })
+testGc.map((a: (Env, Mem , Mem)) => {
+  val ref = a._3
+  test(s"GcTest env: ${a._1}, mem: ${a._2}") {
+    assert(MiniCInterpreter.gc(a._1, a._2) === a._3)
+  }
+})
   miniCTestCases.map((a: (String, Val)) => {
     val ref = a._2
     test(s"test with expected result: ${a._2} input: ${a._1}") {
